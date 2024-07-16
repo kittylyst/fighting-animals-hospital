@@ -20,7 +20,8 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class VeterinaryHospital {
 
-  public static final String INGRESS_CHANNEL = "ingress";
+  public static final String FISH_CHANNEL = "fish";
+  public static final String FELINE_CHANNEL = "feline";
 
   @PostConstruct
   public void init() {}
@@ -29,7 +30,8 @@ public class VeterinaryHospital {
     Log.infof("Hospital starting up");
   }
 
-  @Incoming(INGRESS_CHANNEL)
+  @Incoming(FISH_CHANNEL)
+  @Incoming(FELINE_CHANNEL)
   public CompletionStage<Void> processMainFlow(Message<String> message) {
     var payload = message.getPayload();
     Log.infof("Processed message: %s", payload);
