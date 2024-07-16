@@ -3,25 +3,21 @@ package org.animals;
 
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
-import io.smallrye.reactive.messaging.annotations.Blocking;
+import io.smallrye.reactive.messaging.kafka.api.IncomingKafkaRecordMetadata;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
 
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Stream;
 
 @ApplicationScoped
 public class VeterinaryHospital {
 
   public static final String FISH_CHANNEL = "fish";
   public static final String FELINE_CHANNEL = "feline";
+  public static final String MUSTELID_CHANNEL = "mustelid";
 
   @PostConstruct
   public void init() {}
@@ -32,9 +28,12 @@ public class VeterinaryHospital {
 
   @Incoming(FISH_CHANNEL)
   @Incoming(FELINE_CHANNEL)
+  @Incoming(MUSTELID_CHANNEL)
   public CompletionStage<Void> processMainFlow(Message<String> message) {
     var payload = message.getPayload();
-    Log.infof("Processed message: %s", payload);
+    var topic = message.getMetadata(IncomingKafkaRecordMetadata.class).get().getTopic();
+
+    Log.infof("Processed message: %s on topic %s", payload, topic);
 
     return message.ack();
   }
