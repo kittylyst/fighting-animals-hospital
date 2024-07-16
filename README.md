@@ -20,8 +20,15 @@ The application can be packaged using:
 ./mvnw package
 ```
 
+NOTE: May need to use `-DskipTests` 
+
 It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
 Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
 
 The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
+# To build the image
+
+```shell script
+docker build -t hospital_demo -f src/main/docker/Dockerfile.jvm .
+```
