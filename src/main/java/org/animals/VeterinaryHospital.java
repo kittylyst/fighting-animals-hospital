@@ -3,14 +3,15 @@ package org.animals;
 
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
+import io.quarkus.infinispan.client.Remote;
 import io.smallrye.reactive.messaging.kafka.api.IncomingKafkaRecordMetadata;
+import jakarta.inject.Inject;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.infinispan.client.hotrod.configuration.ClientIntelligence;
-import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.client.hotrod.RemoteCache;
 
 import java.util.concurrent.CompletionStage;
 
@@ -21,13 +22,12 @@ public class VeterinaryHospital {
   public static final String FELINE_CHANNEL = "feline";
   public static final String MUSTELID_CHANNEL = "mustelid";
 
-  @PostConstruct
-  public void init() {
-    var builder = new ConfigurationBuilder();
-    builder.clientIntelligence(ClientIntelligence.BASIC);
-    var config = builder.build();
+  @Inject
+  @Remote("animals")
+  RemoteCache<String, String> lastBattledAnimal;
 
-  }
+  @PostConstruct
+  public void init() {}
 
   void onStart(@Observes StartupEvent ev) {
     Log.infof("Hospital starting up");
@@ -39,8 +39,9 @@ public class VeterinaryHospital {
   public CompletionStage<Void> processMainFlow(Message<String> message) {
     var payload = message.getPayload();
     var topic = message.getMetadata(IncomingKafkaRecordMetadata.class).get().getTopic();
+    Log.infof("Processed message: %s on topic %s, benching them for the next round", payload, topic);
 
-    Log.infof("Processed message: %s on topic %s", payload, topic);
+    lastBattledAnimal.put(topic, payload);
 
     return message.ack();
   }
