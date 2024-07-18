@@ -9,6 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
+import org.infinispan.client.hotrod.configuration.ClientIntelligence;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 
 import java.util.concurrent.CompletionStage;
 
@@ -20,7 +22,12 @@ public class VeterinaryHospital {
   public static final String MUSTELID_CHANNEL = "mustelid";
 
   @PostConstruct
-  public void init() {}
+  public void init() {
+    var builder = new ConfigurationBuilder();
+    builder.clientIntelligence(ClientIntelligence.BASIC);
+    var config = builder.build();
+
+  }
 
   void onStart(@Observes StartupEvent ev) {
     Log.infof("Hospital starting up");
